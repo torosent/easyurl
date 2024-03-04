@@ -1,0 +1,64 @@
+﻿@page "/history"
+@attribute [StreamRendering]
+@using easyurl.Data
+@inject ITableStorage tableStorage
+@inject IJSRuntime JSRuntime;
+@rendermode InteractiveServer
+
+<PageTitle>History</PageTitle>
+
+<h1>History</h1>
+
+<script>
+    window.deleteRow = (dotNetHelper, rowKey) => {
+        return dotNetHelper.invokeMethodAsync('Delete', rowKey);
+    };
+</script>
+
+
+@if (entities == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+    <thead>
+        <tr>
+            <th>Original</th>
+            <th>Short</th>
+            <th>Time</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entity in entities)
+            {
+                <tr>
+                    <td><a href="@entity["OriginalUrl"]" target="_blank">@entity["OriginalUrl"]</a></td>
+                    <td><a href="@entity["ShortenedUrl"]" target="_blank">@entity["ShortenedUrl"]</a></td>
+                    <td>@entity["Timestamp"]</td>
+                    <td><button class="btn btn-danger" @onclick="()=> DeleteAsync(entity.RowKey)">Delete</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Azure.Data.Tables.TableEntity[] entities;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        // Simulate asynchronous loading to demonstrate streaming rendering
+        entities = await tableStorage.GetAllEntities();
+    }
+
+
+    private async Task DeleteAsync(string rowKey)
+    {
+        await tableStorage.DeleteEntity(rowKey.ToString());
+        entities = await tableStorage.GetAllEntities();
+    }
+}

@@ -1,0 +1,47 @@
+name: Trigger auto deployment for easyurl
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/easyurl-AutoDeployTrigger-43f64053-c6ae-4fec-bfb4-b70f49e04b06.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:      
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions: 
+      id-token: write #This is required for requesting the OIDC JWT Token
+      contents: read #Required when GH token is used to authenticate with private repo
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.EASYURL_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.EASYURL_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.EASYURL_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }} 
+          registryUrl: tomerros.azurecr.io
+          registryUsername: ${{ secrets.EASYURL_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.EASYURL_REGISTRY_PASSWORD }}
+          containerAppName: easyurl
+          resourceGroup: peleton
+          imageToBuild: tomerros.azurecr.io/easyurl:${{ github.sha }}
+          _buildArgumentsKey_: |
+            _buildArgumentsValues_
+
+

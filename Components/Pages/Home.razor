@@ -1,0 +1,78 @@
+﻿@page "/"
+
+@using easyurl.Data
+@using Microsoft.AspNetCore.Http
+
+@inject IJSRuntime JsRuntime
+@inject NavigationManager NavigationManager
+@inject ITableStorage tableStorage
+@inject IHttpContextAccessor httpContextAccessor
+@rendermode InteractiveServer
+
+<PageTitle>Easy URL</PageTitle>
+
+<h1>Easy URL</h1>
+<p>Easy URL is a simple URL shortener. Just paste a long URL into the box below and click the "Shorten" button to get a
+    short URL that you can use to share the original link.</p>
+
+<div class="mb-3 row">
+    <div class="col-sm-10">
+        <input class="form-control" @bind="originalUrl" placeholder="Enter URL" />
+    </div>
+    <button class="col-sm-2 btn btn-primary" @onclick=ShortenUrl>Shorten URL</button>
+</div>
+
+@if (!string.IsNullOrEmpty(shortenedUrl))
+{
+    <p>Shortened URL: <a href="@shortenedUrl" target="_blank">@shortenedUrl</a></p>
+}
+
+@code {
+    private string originalUrl = "";
+    private string shortenedUrl = "";
+
+    /// <summary>
+    /// Shorten the URL
+    /// </summary>
+    private async Task ShortenUrl()
+    {
+        if (!string.IsNullOrEmpty(originalUrl))
+        {
+            Uri uriResult;
+            if (Uri.TryCreate(originalUrl, UriKind.Absolute, out uriResult))
+            {
+                string key = GenerateKey();
+                while (await tableStorage.CheckIfKeyExists(key))
+                {
+                    key = GenerateKey();
+                }
+                string baseUrl = NavigationManager.BaseUri;
+                shortenedUrl = baseUrl + @"r/" + key;
+                await tableStorage.SaveShortenedUrl(originalUrl, key, shortenedUrl,
+                httpContextAccessor.HttpContext.Connection?.RemoteIpAddress.MapToIPv4().ToString());
+            }
+            else
+            {
+                shortenedUrl = "";
+            }
+        }
+        await JsRuntime.InvokeVoidAsync("console.log", shortenedUrl);
+
+    }
+
+    /// <summary>
+    /// Generate a random key for the shortened URL
+    /// </summary>
+    private string GenerateKey()
+    {
+        // Generate a random key for the shortened URL
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        char[] key = new char[6];
+        Random random = new Random();
+        for (int i = 0; i < key.Length; i++)
+        {
+            key[i] = chars[random.Next(chars.Length)];
+        }
+        return new string(key);
+    }
+}

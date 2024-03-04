@@ -1,0 +1,27 @@
+@page "/r/{Code}"
+@using easyurl.Data;
+@using Microsoft.AspNetCore.Http
+@inject IJSRuntime JsRuntime
+@inject NavigationManager NavigationManager
+@inject ITableStorage tableStorage
+@inject IHttpContextAccessor httpContextAccessor
+@rendermode InteractiveServer
+
+@code {
+    [Parameter]
+    public string? Code { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Code == null)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+        var url = tableStorage.GetShortenedUrl(Code);
+        if (string.IsNullOrEmpty(url))
+        {
+            NavigationManager.NavigateTo("/");
+        }
+        NavigationManager.NavigateTo(url);
+    }
+}
