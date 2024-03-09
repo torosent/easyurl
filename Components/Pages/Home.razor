@@ -12,14 +12,18 @@
 <PageTitle>Easy URL</PageTitle>
 
 <h1>Easy URL</h1>
-<p>Easy URL is a simple URL shortener. Just paste a long URL into the box below and click the "Shorten" button to get a
-    short URL that you can use to share the original link.</p>
+<div class="mb-4">
+    Easy URL is a simple URL shortener. Just paste a long URL into the box below and click the "Shorten" button to get a
+    short URL that you can use to share the original link.
+</div>
 
-<div class="mb-3 row">
-    <div class="col-sm-10">
+<div class="row g-3">
+    <div class="col-sm-5">
         <input class="form-control" @bind="originalUrl" placeholder="Enter URL" />
     </div>
-    <button class="col-sm-2 btn btn-primary" @onclick=ShortenUrl>Shorten URL</button>
+    <div class="col-sm-1">
+        <button class="btn btn-success" @onclick=ShortenUrl>Shorten</button>
+    </div>
 </div>
 
 @if (!string.IsNullOrEmpty(shortenedUrl))
