@@ -20,7 +20,7 @@
 <div class="row g-3">
     <div class="col-sm-5">
         <input class="form-control" @bind="originalUrl"
-            placeholder="Example: http://super-long-link.com/make-it-shorter" />
+            placeholder="Example: https://super-long-link.com/make-it-shorter" />
     </div>
     <div class="col-sm-2">
         <button class="btn btn-success" @onclick=ShortenUrl>Shorten
@@ -32,11 +32,15 @@
         </button>
     </div>
 </div>
+<br />
 
 @if (!string.IsNullOrEmpty(shortenedUrl))
 {
-    <div class="alert alert-primary" role="alert">
-    <p>Shortened URL: <a href="@shortenedUrl" target="_blank">@shortenedUrl</a></p>
+    <div class="row g-1">
+
+    <div class="col-sm-5 alert alert-primary" role="alert">
+        <p>Shortened URL: <a href="@shortenedUrl" target="_blank">@shortenedUrl</a></p>
+    </div>
 </div>
 }
 
